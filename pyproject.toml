@@ -1,0 +1,21 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+norecursedirs = ["backup", ".venv", "__pycache__", "data", "static/audio", "helpers"]
+
+[tool.ruff]
+target-version = "py311"
+include = ["altera.py", "core/**/*.py", "scripts/**/*.py", "tests/**/*.py", "voice/**/*.py"]
+extend-exclude = ["backup", "backups", "data", ".claude", ".venv"]
+
+[tool.ruff.lint]
+# Errors and likely bugs (E, F, W, B, PLE, T10), modern syntax for Python 3.11 (UP), small redundancies (PIE), and
+# no noqa comment that no longer suppresses anything (RUF100).
+select = ["E4", "E7", "E9", "F", "W", "B", "PLE", "T10", "UP", "PIE", "RUF100"]
+# zip(strict=...) would change behaviour at call sites written for unequal lengths; each would need its own review.
+ignore = ["B905"]
+
+[tool.ruff.lint.per-file-ignores]
+# Shared fixtures are imported from other test modules and then named as test parameters, which is how pytest finds
+# them (F811). Tests keep short setup on one line (E701, E702).
+"tests/**" = ["F811", "E701", "E702"]

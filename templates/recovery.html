@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Altera — Backup recovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/backup.css') }}">
+</head>
+<body class="backup-recovery">
+    <main>
+        <h1>Backup recovery</h1>
+        <p>An interrupted restore is keeping conversations paused. Restore the saved recovery backup to return to the previous stable data.</p>
+        <button type="button" data-click="BackupUI.open">Open backup and restore</button>
+        <p id="recoveryStatus" role="status"></p>
+    </main>
+    {% include 'backup_dialog.html' %}
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }}; window.__ALTERA_RECOVERY__ = true;</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/actions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/offline-queue.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/backups.js') }}"></script>
+    <script nonce="{{ csp_nonce }}">AlteraPage.ready(() => BackupUI.open());</script>
+</body>
+</html>

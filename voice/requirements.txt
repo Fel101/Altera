@@ -1,0 +1,10 @@
+# Altera's local voice service (voice/serve.py). Installed into voice/.venv by voice/setup.bat or voice/setup.sh,
+# never into Altera's own environment. Kokoro brings PyTorch, misaki (its English pronunciation) and huggingface_hub.
+# For an NVIDIA card, install the CUDA build of PyTorch into voice/.venv first (https://pytorch.org). The CPU build works everywhere,
+# and it is what serve.py uses unless told otherwise.
+kokoro>=0.9.4,<0.10
+# serve.py also imports these directly. Kokoro already brings them; they are named so that a change upstream cannot
+# take them away. An existing CUDA build of torch satisfies the torch line.
+torch
+numpy
+huggingface_hub

@@ -1,0 +1,94 @@
+/* Altera — the kids view: the chat with kids pals, and nothing that leads to anyone else.
+   The server refuses the rest for this browser too; this only keeps the controls out of the way. */
+body.kids-view .sidebar-nav,
+body.kids-view .new-chat-btn,
+body.kids-view #addPersonMenu,
+body.kids-view .settings-btn,
+body.kids-view .bottom-nav,
+body.kids-view #photoBtn,
+body.kids-view #voiceNotesBtn,
+body.kids-view #micBtn,
+body.kids-view #sharedSceneOpen,
+body.kids-view #photoGalleryOverlay,
+body.kids-view #toolDrawer,
+body.kids-view #moodBadge,
+body.kids-view .portrait-actions,
+body.kids-view #presenceBannerHost,
+body.kids-view .feature-hint,
+body.kids-view .health-indicators,
+body.kids-view .offline-indicator,
+body.kids-view .install-btn,
+body.kids-view .sidebar-header .status-indicator {
+    display: none !important;
+}
+
+/* The picture and workspace buttons in the header stay hidden; the discreet button is harmless and stays. */
+body.kids-view .header-actions .tool-toggle-btn[title="Saved pictures"],
+body.kids-view .header-actions .tool-toggle-btn[title="Workspace tools"] {
+    display: none !important;
+}
+
+.kids-badge {
+    align-self: flex-start;
+    margin-left: 8px;
+    padding: 3px 9px;
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: 999px;
+    background: var(--accent-glow);
+    color: var(--accent-hover);
+    font-size: 0.68rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.kids-leave {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+/* Leaving asks for the PIN, in a dialog that traps and restores focus like the other dialogs. */
+.kids-dialog {
+    width: min(420px, calc(100% - 32px));
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+.kids-dialog::backdrop { background: rgba(6, 4, 10, 0.66); }
+.kids-dialog h2 { margin: 0 0 6px; font-size: 1.2rem; font-weight: 650; letter-spacing: -0.02em; }
+.kids-dialog p { margin: 0 0 14px; color: var(--text-secondary); font-size: 0.9rem; }
+.kids-field { display: block; margin-bottom: 6px; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem; }
+.kids-dialog input {
+    width: 100%;
+    min-height: 46px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 13px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 1.1rem;
+    letter-spacing: 0.25em;
+}
+.kids-status { min-height: 1.4em; margin: 10px 0 0; color: var(--accent-warm); font-size: 0.88rem; }
+.kids-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+.kids-actions button {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.kids-actions button:hover { border-color: var(--accent); background: var(--bg-hover); }
+.kids-actions .kids-primary { border-color: transparent; background: var(--accent); color: var(--on-accent); }
+.kids-actions .kids-primary:hover { background: var(--accent-hover); }
+.kids-actions button:disabled { opacity: 0.55; cursor: not-allowed; }
+.kids-dialog :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

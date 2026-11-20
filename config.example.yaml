@@ -1,0 +1,55 @@
+app:
+  host: 127.0.0.1
+  port: 5001
+  debug: false
+llm:
+  provider: lmstudio
+  model: ''  # Select the model served by your provider in Settings.
+  temperature: 0.85
+  max_tokens: 1024
+  sampling: {}  # Optional top_p, min_p, repetition_penalty, presence_penalty, frequency_penalty; see docs/REPLY_SETTINGS.md.
+  providers: {}  # Provider presets are in core/providers.py; override endpoints here.
+memory:
+  top_k: 5
+  # Optional existing read-only MiniLM ONNX folder; relative paths use ALTERA_HOME.
+  # embedding_model_path: models/minilm/onnx
+voice:
+  tts_enabled: false
+  tts_engine: kokoro
+  cloud_fallback: false
+  kokoro:
+    url: http://127.0.0.1:8770
+    # Install Altera's local voice first (voice\setup.bat or sh voice/setup.sh), then set autostart: true.
+    autostart: false
+companion:
+  notes:
+    enabled: true
+    context_tokens: 8192
+  memory:
+    # Automatic memories are written by the chat model after this many of your messages have gathered.
+    every_messages: 4
+  forge: {}  # Uses the local NPC Forge service unless url is set here.
+imagegen:
+  enabled: false
+  workflows: {}
+tools:
+  enabled: false
+# Search sends model-generated queries to external providers. Enable both
+# this switch and the chosen provider only after reviewing that recipient.
+web_search:
+  enabled: false
+  default_provider: duckduckgo
+  providers:
+    duckduckgo:
+      enabled: false
+    wikipedia:
+      enabled: false
+    openweathermap:
+      enabled: false
+      api_key: ''
+    serpapi:
+      enabled: false
+      api_key: ''
+# Legacy compatibility only. Scheduled presence needs per-companion consent in Settings.
+phase4:
+  proactive_enabled: false

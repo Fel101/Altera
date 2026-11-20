@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ personality.name }} — Your Life Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .knowledge-page { display: flex; height: 100vh; }
+
+        /* Sidebar */
+        .knowledge-sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            gap: 16px;
+        }
+
+        .knowledge-sidebar h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .knowledge-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .knowledge-back-btn:hover { background: var(--bg-hover); }
+
+        /* Content */
+        .knowledge-content { flex: 1; overflow-y: auto; padding: 40px; background: var(--bg-primary); }
+
+        .knowledge-header { text-align: center; margin-bottom: 40px; }
+        .knowledge-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .knowledge-header p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(124, 111, 247, 0.1); }
+        .stat-icon { font-size: 2rem; margin-bottom: 8px; }
+        .stat-value { font-size: 2rem; font-weight: 600; color: var(--accent-hover); margin-bottom: 4px; }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Sections */
+        .knowledge-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title { font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .section-count { font-size: 0.85rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 4px 12px; border-radius: 12px; }
+
+        /* Memories list */
+        .memory-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .memory-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .memory-item:hover { border-color: var(--accent); }
+
+        .memory-content { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; line-height: 1.5; }
+
+        .memory-meta { display: flex; gap: 12px; align-items: center; font-size: 0.75rem; color: var(--text-muted); }
+
+        .confidence-bar {
+            width: 60px; height: 4px; background: var(--bg-tertiary); border-radius: 2px; overflow: hidden;
+        }
+
+        .confidence-fill { height: 100%; background: linear-gradient(90deg, #f87171, #fbbf24, #4ade80); transition: width 0.3s; }
+
+        /* Life events timeline */
+        .events-timeline { position: relative; padding-left: 30px; }
+
+        .events-timeline::before {
+            content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--accent), var(--border));
+        }
+
+        .event-item {
+            position: relative; margin-bottom: 24px; padding-left: 20px;
+        }
+
+        .event-dot {
+            position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--bg-primary); border: 2px solid var(--accent); z-index: 1;
+        }
+
+        .event-dot.birthday { border-color: #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
+        .event-dot.achievement { border-color: #4ade80; box-shadow: 0 0 8px rgba(74, 222, 128, 0.3); }
+        .event-dot.trip { border-color: #60a5fa; box-shadow: 0 0 8px rgba(96, 165, 250, 0.3); }
+        .event-dot.work { border-color: #c084fc; box-shadow: 0 0 8px rgba(192, 132, 252, 0.3); }
+        .event-dot.relationship { border-color: #f472b6; box-shadow: 0 0 8px rgba(244, 114, 182, 0.3); }
+        .event-dot.health { border-color: #fb923c; box-shadow: 0 0 8px rgba(251, 146, 60, 0.3); }
+        .event-dot.holiday { border-color: #a78bfa; box-shadow: 0 0 8px rgba(167, 139, 250, 0.3); }
+
+        .event-type-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; background: rgba(124, 111, 247, 0.15); color: var(--accent-hover);
+        }
+
+        .event-detail { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 4px; }
+        .event-date { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Relationships */
+        .relationship-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+
+        .relationship-card {
+            background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; transition: all 0.2s;
+        }
+
+        .relationship-card:hover { border-color: var(--accent); }
+        .rel-name { font-weight: 500; color: var(--text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .rel-type { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: var(--bg-tertiary); color: var(--text-muted); text-transform: uppercase; }
+        .rel-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* Export buttons */
+        .export-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; justify-content: center; }
+
+        .export-btn {
+            padding: 12px 24px; border-radius: var(--radius-md); cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+        }
+
+        .export-btn.primary { background: linear-gradient(135deg, var(--accent), #a78bfa); color: white; border: none; }
+        .export-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(124, 111, 247, 0.3); }
+
+        .export-btn.secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); }
+        .export-btn.secondary:hover { border-color: var(--accent); }
+
+        /* Loading */
+        .loading-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .loading-state .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .knowledge-page { flex-direction: column; }
+            .knowledge-sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 12px; }
+            .knowledge-content { padding: 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }};</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/actions.js') }}"></script>
+</head>
+<body>
+    <div class="knowledge-page">
+        <!-- Sidebar -->
+        <aside class="knowledge-sidebar">
+            <h1>{{ personality.name }}</h1>
+            
+            <a href="/" class="knowledge-back-btn">← Back to Chat</a>
+
+            <button class="knowledge-back-btn" data-click="loadKnowledge" style="margin-top: 8px;">🔄 Refresh Data</button>
+
+            <!-- Quick actions -->
+            <div style="padding: 16px; background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                <h3 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">Quick Actions</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button data-click="loadRelationships" style="padding: 8px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; text-align: left;">👥 View Relationships</button>
+                    <button data-click="exportData" data-args='["json"]' style="padding: 8px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; text-align: left;">📦 Export JSON</button>
+                    <button data-click="exportData" data-args='["markdown"]' style="padding: 8px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; text-align: left;">📝 Export Markdown</button>
+                </div>
+            </div>
+
+            <button class="settings-btn" data-click="toggleSettings" style="margin-top: auto;">⚙️ Settings</button>
+        </aside>
+
+        <!-- Content -->
+        <main class="knowledge-content">
+            <div class="knowledge-header">
+                <h2>Your Life Data</h2>
+                <p>{{ personality.name }}'s knowledge about you — memories, events, and relationships</p>
+            </div>
+
+            <!-- Export actions -->
+            <div class="export-actions">
+                <button class="export-btn primary" data-click="exportData" data-args='["json"]'>📦 JSON Export</button>
+                <button class="export-btn secondary" data-click="exportData" data-args='["markdown"]'>📝 Markdown Report</button>
+                <button class="export-btn secondary" data-click="exportData" data-args='["pdf"]'>📄 PDF Summary</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card"><div class="stat-icon">🧠</div><div class="stat-value" id="memCount">-</div><div class="stat-label">Memories</div></div>
+                <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value" id="highConfCount">-</div><div class="stat-label">High Confidence</div></div>
+                <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value" id="eventCount">-</div><div class="stat-label">Life Events</div></div>
+                <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="relCount">-</div><div class="stat-label">Relationships</div></div>
+            </div>
+
+            <!-- Memories by type -->
+            <div class="knowledge-section">
+                <div class="section-header">
+                    <span class="section-title">📌 Facts & Preferences</span>
+                    <span class="section-count" id="memTypeCount">Loading...</span>
+                </div>
+                <div class="memory-list" id="memoryList">
+                    <div class="loading-state"><div class="spinner"></div><p>Loading memories...</p></div>
+                </div>
+            </div>
+
+            <!-- Relationships -->
+            <div class="knowledge-section">
+                <div class="section-header">
+                    <span class="section-title">👥 People & Places</span>
+                    <button data-click="loadRelationships" style="padding: 6px 12px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.8rem;">Refresh</button>
+                </div>
+                <div class="relationship-grid" id="relationshipGrid">
+                    <div class="loading-state"><div class="spinner"></div><p>Loading relationships...</p></div>
+                </div>
+            </div>
+
+            <!-- Memory Deduplication -->
+            <div class="knowledge-section" id="dedupSection">
+                <div class="section-header">
+                    <span class="section-title">🔍 Duplicate Memories</span>
+                    <button data-click="loadDuplicates" style="padding: 6px 12px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.8rem;">Scan for Duplicates</button>
+                </div>
+                <div id="dedupResults" style="color: var(--text-muted); font-size: 0.9rem;">
+                    <p>Click "Scan for Duplicates" to find and merge duplicate memories.</p>
+                </div>
+            </div>
+
+            <!-- User Profile -->
+            <div class="knowledge-section">
+                <div class="section-header">
+                    <span class="section-title">👤 About You</span>
+                </div>
+                <div id="userProfileSection" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                    <p>Loading your profile...</p>
+                </div>
+            </div>
+
+            <!-- Export Status -->
+            <div class="knowledge-section hidden" id="exportStatusSection">
+                <div class="section-header">
+                    <span class="section-title">📦 Export Status</span>
+                    <button data-click="hideExportStatus" style="padding: 6px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.8rem;">✕</button>
+                </div>
+                <div id="exportStatusContent" style="color: var(--text-secondary); font-size: 0.9rem;"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel hidden" id="settingsPanel">
+        <div class="settings-content"><h3>Settings</h3></div>
+    </div>
+
+    <script nonce="{{ csp_nonce }}">
+
+        async function loadKnowledge() {
+            try {
+                const response = await fetch('/api/knowledge/summary');
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                // Update stats
+                document.getElementById('memCount').textContent = data.memories.total || 0;
+                document.getElementById('highConfCount').textContent = data.memories.high_confidence || 0;
+                document.getElementById('eventCount').textContent = data.life_events?.total || 0;
+                document.getElementById('relCount').textContent = data.relationships?.people || 0;
+
+                // Load memories by type
+                loadMemoriesByType(data);
+
+                // Load relationships
+                loadRelationships();
+
+                // Update user profile
+                if (data.user_profile) {
+                    const up = data.user_profile;
+                    let html = '';
+                    if (up.name) html += `<p><strong>Name:</strong> ${escapeHtml(up.name)}</p>`;
+                    if (up.hobbies && up.hobbies.length > 0) html += `<p><strong>Hobbies:</strong> ${up.hobbies.map(h => escapeHtml(h)).join(', ')}</p>`;
+                    if (up.preferences) {
+                        html += '<p><strong>Preferences:</strong></p><ul>';
+                        for (const [key, value] of Object.entries(up.preferences)) {
+                            html += `<li>${escapeHtml(key)}: ${escapeHtml(String(value))}</li>`;
+                        }
+                        html += '</ul>';
+                    }
+                    document.getElementById('userProfileSection').innerHTML = html || '<p>No profile data yet.</p>';
+                }
+
+            } catch (err) {
+                console.error('Failed to load knowledge:', err);
+            }
+        }
+
+        function loadMemoriesByType(data) {
+            const listEl = document.getElementById('memoryList');
+            
+            // Get memories from the summary data if available, otherwise fetch separately
+            let facts = [];
+            let preferences = [];
+            
+            // We need to fetch them separately since the summary API doesn't return full memory objects
+            fetch('/api/memory/dedup').then(r => r.json()).then(dedupData => {
+                if (dedupData.duplicates) {
+                    const allMems = dedupData.duplicates.flatMap(g => g.memories);
+                    // Deduplicate by id
+                    const seen = new Set();
+                    facts = []; preferences = [];
+                    for (const m of allMems) {
+                        if (seen.has(m.id)) continue;
+                        seen.add(m.id);
+                        const type = m.metadata?.type || 'fact';
+                        if (type === 'preference') preferences.push(m);
+                        else facts.push(m);
+                    }
+                }
+
+                // Show top memories by confidence
+                let html = '';
+                
+                if (facts.length > 0) {
+                    const sortedFacts = [...facts].sort((a, b) => (b.metadata?.confidence || 0) - (a.metadata?.confidence || 0)).slice(0, 15);
+                    for (const m of sortedFacts) {
+                        html += renderMemoryItem(m);
+                    }
+                }
+
+                if (preferences.length > 0) {
+                    const sortedPrefs = [...preferences].sort((a, b) => (b.metadata?.confidence || 0) - (a.metadata?.confidence || 0)).slice(0, 15);
+                    for (const m of sortedPrefs) {
+                        html += renderMemoryItem(m);
+                    }
+                }
+
+                if (!html) html = '<p style="color: var(--text-muted);">No memories yet. Start chatting to build your knowledge base!</p>';
+                
+                listEl.innerHTML = html;
+                document.getElementById('memTypeCount').textContent = `${facts.length + preferences.length} items`;
+            });
+        }
+
+        function renderMemoryItem(m) {
+            const content = m.content || '';
+            const confidence = m.metadata?.confidence || 0.5;
+            const created = m.metadata?.created_at || 'unknown';
+            
+            let dateStr = created;
+            try {
+                const dt = new Date(created);
+                if (!isNaN(dt.getTime())) dateStr = dt.toLocaleDateString();
+            } catch (e) {}
+
+            return `
+                <div class="memory-item">
+                    <div class="memory-content">${escapeHtml(content)}</div>
+                    <div class="memory-meta">
+                        <span>Confidence:</span>
+                        <div class="confidence-bar"><div class="confidence-fill" style="width: ${confidence * 100}%"></div></div>
+                        <span>${Math.round(confidence * 100)}%</span>
+                        <span>📅 ${dateStr}</span>
+                    </div>
+                </div>`;
+        }
+
+        async function loadRelationships() {
+            try {
+                const response = await fetch('/api/relationships/depth');
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                document.getElementById('relCount').textContent = data.total_entities || 0;
+
+                const gridEl = document.getElementById('relationshipGrid');
+                
+                // Get people and places from the graph
+                let html = '';
+                
+                for (const [key, rel] of Object.entries(data.graph)) {
+                    if (!rel.name) continue;
+                    
+                    const typeIcon = rel.type === 'person' ? '👤' : rel.type === 'place' ? '📍' : '🏢';
+                    const mentions = rel.mention_count || 0;
+                    const depth = rel.depth_score || 0;
+
+                    html += `
+                        <div class="relationship-card">
+                            <div class="rel-name">${typeIcon} ${escapeHtml(rel.name)}</div>
+                            <span class="rel-type">${rel.type}</span>
+                            <div class="rel-meta">📊 ${mentions} mentions · Depth: ${depth.toFixed(1)}</div>
+                        </div>`;
+                }
+
+                if (!html) html = '<p style="color: var(--text-muted);">No relationships tracked yet.</p>';
+                gridEl.innerHTML = html;
+            } catch (err) {
+                document.getElementById('relationshipGrid').innerHTML = `<p style="color: var(--text-muted);">Error loading relationships: ${escapeHtml(err.message)}</p>`;
+            }
+        }
+
+        // ============================================================
+        // Duplicate Memory Review & Consolidation
+        // ============================================================
+
+        async function loadDuplicates() {
+            const el = document.getElementById('dedupResults');
+            el.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Scanning for duplicates...</p></div>';
+
+            try {
+                const response = await fetch('/api/memory/dedup');
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                if (!data.duplicates || data.duplicates.length === 0) {
+                    el.innerHTML = '<p style="color: #4ade80;">✅ No duplicate memories found. Your knowledge base is clean!</p>';
+                    return;
+                }
+
+                let html = `<p style="margin-bottom: 16px;">Found <strong>${data.total_duplicates}</strong> group(s) of potential duplicates out of ${data.total_memories} total memories.</p>`;
+
+                for (let gIdx = 0; gIdx < data.duplicates.length; gIdx++) {
+                    const group = data.duplicates[gIdx];
+                    html += `<div style="margin-bottom: 20px; padding: 16px; background: var(--bg-primary); border-radius: var(--radius-sm);">`;
+                    html += `<strong>${group.type} — ${group.memories.length} similar entries:</strong><br>`;
+
+                    for (let mIdx = 0; mIdx < group.memories.length; mIdx++) {
+                        const mem = group.memories[mIdx];
+                        const conf = Math.round((mem.metadata?.confidence || 0) * 100);
+                        html += `<div style="margin: 8px 0; padding-left: 12px; border-left: 3px solid var(--accent);">`;
+                        html += `<code>${escapeHtml(mem.content)}</code><br>`;
+                        html += `<small>Confidence: ${conf}% · ID: ${mem.id}</small>`;
+                        if (mIdx < group.memories.length - 1) {
+                            const sim = Math.round((group.similarity_scores[mIdx] || 0) * 100);
+                            html += ` <span style="color: var(--text-muted);">(${sim}% similar)</span>`;
+                        }
+                        html += `</div>`;
+                    }
+
+                    // Consolidate this group button
+                    const memIds = JSON.stringify(group.memories.map(m => m.id));
+                    html += `<button data-click="consolidateGroup" data-args="[${gIdx}]" style="margin-top: 10px; padding: 6px 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.8rem;">Merge this group</button>`;
+                    html += `</div>`;
+                }
+
+                // Consolidate all button
+                const dupIds = JSON.stringify(data.duplicates.map(g => g.memories.flatMap(m => m.id)));
+                html += `<button data-click="consolidateAll" style="padding: 10px 24px; background: linear-gradient(135deg, var(--accent), #a78bfa); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; font-size: 0.9rem;">🧹 Consolidate All Duplicates</button>`;
+
+                el.innerHTML = html;
+            } catch (err) {
+                el.innerHTML = `<p style="color: #f87171;">Error scanning duplicates: ${escapeHtml(err.message)}</p>`;
+            }
+        }
+
+        function hideExportStatus() {
+            document.getElementById('exportStatusSection').classList.add('hidden');
+        }
+
+        async function consolidateGroup(groupIdx) {
+            try {
+                const response = await fetch('/api/memory/dedup/consolidate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ auto: true })  // Simplified — always consolidates all for now
+                });
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                showExportStatus('✅ Consolidated ' + data.consolidations.length + ' duplicate group(s)!');
+                loadDuplicates();  // Refresh the view
+            } catch (err) {
+                showExportStatus('❌ Consolidation error: ' + err.message, true);
+            }
+        }
+
+        async function consolidateAll() {
+            if (!confirm('This will merge all duplicate memories. Continue?')) return;
+
+            try {
+                const response = await fetch('/api/memory/dedup/consolidate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ auto: true })
+                });
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                showExportStatus('✅ Consolidated ' + data.consolidations.length + ' duplicate group(s)! Your knowledge base is now clean.');
+                loadDuplicates();
+            } catch (err) {
+                showExportStatus('❌ Consolidation error: ' + err.message, true);
+            }
+        }
+
+        // ============================================================
+        // Export with Status Feedback
+        // ============================================================
+
+        async function exportData(format) {
+            try {
+                const response = await fetch('/api/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ format })
+                });
+
+                if (!response.ok) throw new Error('Export failed');
+
+                // Check content type to detect PDF fallback
+                const contentType = response.headers.get('content-type') || '';
+
+                if (contentType.includes('text/html')) {
+                    showExportStatus('⚠️ PDF export fell back to HTML format. wkhtmltopdf is not installed — install it for true PDF, or use Markdown export instead.', false);
+                } else {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+
+                    const filename = format === 'json' ? `altera-data-${new Date().toISOString().slice(0, 10)}.json` :
+                                     format === 'markdown' ? `altera-knowledge-base-${new Date().toISOString().slice(0, 10)}.md` :
+                                     `altera-knowledge-base-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    showExportStatus('✅ Exported ' + format.toUpperCase() + '! File downloaded.');
+                }
+
+            } catch (err) {
+                showExportStatus('❌ Export failed: ' + err.message, true);
+            }
+        }
+
+        function showExportStatus(message, isError = false) {
+            const section = document.getElementById('exportStatusSection');
+            const content = document.getElementById('exportStatusContent');
+            content.innerHTML = `<p style="color: ${isError ? '#f87171' : '#4ade80'};">${escapeHtml(message)}</p>`;
+            section.classList.remove('hidden');
+            // Auto-scroll to the status section
+            section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        // Load on page load
+        AlteraPage.ready(loadKnowledge);
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0f0d15">
+    <title>Altera — Setup</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/setup.css') }}">
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }}; try { AlteraPage.ready(() => { const root = document.documentElement; root.dataset.theme = AlteraStorage.local.getItem('altera_theme') || 'dark'; root.classList.toggle('discreet', AlteraStorage.local.getItem('altera_discreet') === '1'); }); } catch (_) {}</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</head>
+<body class="home-page setup-page">
+    <main class="home-shell setup-shell">
+        <header class="home-head">
+            <div>
+                <p class="home-eyebrow">Altera</p>
+                <h1 id="setupTitle">Set up Altera</h1>
+                <p id="setupIntro" class="home-muted">One name, one model, and you are ready.</p>
+            </div>
+            <a href="/home" id="setupSkipLink">Skip for now</a>
+        </header>
+
+        <section class="setup-card" aria-labelledby="setupNameTitle">
+            <h2 id="setupNameTitle">What should Altera call you?</h2>
+            <p class="home-muted">Characters use this name when they talk to you. You can change it later in Settings.</p>
+            <label class="home-field">Your name<input id="setupName" type="text" maxlength="50" autocomplete="given-name" placeholder="Your name"></label>
+        </section>
+
+        <section class="setup-card" aria-labelledby="setupModelTitle">
+            <h2 id="setupModelTitle">A chat model</h2>
+            <p class="home-muted">Altera talks to a model server, usually LM Studio or Ollama on this PC. Choose one and a model it serves. The check sends one short fixed test message, never anything you typed, so the first real one does not fail.</p>
+            <div class="setup-picker">
+                <label class="home-field">Provider<select id="setupProvider"></select></label>
+                <label class="home-field">Model<select id="setupModel"></select></label>
+                <button type="button" id="setupUse" class="home-secondary">Use this model</button>
+            </div>
+            <p id="setupWhere" class="home-muted"></p>
+            <p id="setupModelState" class="home-status" role="status" aria-live="polite">Checking the model…</p>
+            <p id="setupModelDetail" class="home-muted"></p>
+            <p id="setupModelNote" class="home-muted"></p>
+            <button type="button" id="setupCheck" class="home-secondary">Check again</button>
+        </section>
+
+        <section class="setup-card" aria-labelledby="setupOptionalTitle">
+            <h2 id="setupOptionalTitle">Optional</h2>
+            <p class="home-muted">None of these is needed to chat. Each one adds something, and you can set them up later.</p>
+            <ul id="setupOptional" class="setup-list" aria-live="polite"></ul>
+        </section>
+
+        <p id="setupStatus" class="home-status" role="status" aria-live="polite"></p>
+        <div class="setup-actions">
+            <button type="button" id="setupSkip" class="home-secondary">Skip for now</button>
+            <button type="button" id="setupDone" class="home-primary">Finish and make a pal</button>
+        </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/setup.js') }}"></script>
+</body>
+</html>

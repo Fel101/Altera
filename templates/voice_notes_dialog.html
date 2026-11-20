@@ -1,0 +1,18 @@
+<dialog id="voiceNotesDialog" class="backup-dialog voice-notes-dialog" aria-labelledby="voiceNotesTitle">
+    <header><h2 id="voiceNotesTitle">Voice notes</h2><button type="button" id="voiceNotesClose" aria-label="Close voice notes">×</button></header>
+    <p>Voice note mode saves a recording for transcription and review. Your chat microphone sends immediately; voice notes send only when you press Send reviewed note.</p>
+    <p>Recordings and transcripts are private, unencrypted data. This browser keeps up to 10 recordings and 100 MiB; Altera keeps uploaded notes on this PC.</p>
+    <div class="voice-note-actions"><button type="button" id="voiceNotesRecord">Record voice note</button><button type="button" id="voiceNotesStop" disabled>Stop and save recording</button><button type="button" id="voiceNotesRefresh">Refresh saved notes</button></div>
+    <p id="voiceNotesStatus" role="status" aria-live="polite"></p>
+    <section id="voiceNotesList" aria-label="Saved voice notes"></section>
+    <section id="voiceNotesDetail" hidden aria-label="Selected voice note">
+        <p id="voiceNotesContext"></p>
+        <label for="voiceNotesInputAudio">Your recording</label><audio id="voiceNotesInputAudio" aria-label="Your recorded voice note" controls preload="none"></audio>
+        <a id="voiceNotesDownload" hidden download="voice-note.webm">Download original recording</a>
+        <div class="voice-note-actions"><button type="button" id="voiceNotesUpload">Upload recording to Altera</button><button type="button" id="voiceNotesTranscribe">Transcribe locally</button><button type="button" id="voiceNotesRebind">Copy recording to current context</button></div>
+        <label for="voiceNotesTranscript">Transcript to review</label><textarea id="voiceNotesTranscript" rows="6" maxlength="10000" disabled></textarea>
+        <div class="voice-note-actions"><button type="button" id="voiceNotesSave">Save transcript edit</button><button type="button" id="voiceNotesReview">Confirm reviewed revision</button><button type="button" id="voiceNotesSend">Send reviewed note</button></div>
+        <section id="voiceNotesReplyAudio" aria-label="Saved reply audio"></section>
+        <button type="button" id="voiceNotesDelete">Delete this voice note</button>
+    </section>
+</dialog>

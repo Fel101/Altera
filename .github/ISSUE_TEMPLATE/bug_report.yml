@@ -1,0 +1,66 @@
+name: Something doesn't work
+description: Report a bug. Please leave out your conversations and anything personal.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Please **never paste your conversations, memories, notes or pictures**, and remove
+        names, addresses and API keys from anything you paste. If you can, reproduce the problem with a made-up pal and
+        made-up messages.
+
+        A security problem, or a way past the age checks or out of the kids view, goes through private reporting
+        instead: open the **Security** tab and choose **Report a vulnerability** (see SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Using made-up data, the shortest way to make it happen again.
+      placeholder: |
+        1. Make a pal called Test
+        2. Send "hello"
+        3. ...
+  - type: input
+    id: version
+    attributes:
+      label: Altera version
+      description: Shown at the bottom of Settings, and on the first line Altera writes to data/altera.log.
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - Linux
+        - macOS
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model server and model
+      description: For example "LM Studio, qwen3-8b" or "Ollama, llama3.2". Leave it out if it doesn't matter.
+  - type: textarea
+    id: log
+    attributes:
+      label: The error from data/altera.log
+      description: |
+        Only the lines around the error. Check them first: remove names, file paths with your user name, and anything
+        you or a companion wrote.
+      render: text
+  - type: checkboxes
+    id: private
+    attributes:
+      label: Privacy
+      options:
+        - label: I checked that nothing above contains my conversations, personal details or keys.
+          required: true

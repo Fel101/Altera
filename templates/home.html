@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0f0d15">
+    <title>Altera — Home</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }}; try { AlteraPage.ready(() => { const root = document.documentElement; root.dataset.theme = AlteraStorage.local.getItem('altera_theme') || 'dark'; root.classList.toggle('discreet', AlteraStorage.local.getItem('altera_discreet') === '1'); }); } catch (_) {}</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</head>
+<body class="home-page">
+    <main class="home-shell" id="homePage">
+        <header class="home-head">
+            <div>
+                <p class="home-eyebrow">Altera</p>
+                <h1>Who would you like to talk to?</h1>
+            </div>
+            <a href="/" id="homeChatLink">Open chat</a>
+        </header>
+
+        <p id="homeStatus" class="home-status" role="status" aria-live="polite">Loading people…</p>
+
+        <section id="homeContinue" class="home-continue" aria-labelledby="homeContinueName" hidden>
+            <img id="homeContinuePortrait" class="home-portrait" alt="" hidden>
+            <div class="home-continue-text">
+                <p class="home-eyebrow">Continue</p>
+                <h2 id="homeContinueName"></h2>
+                <p id="homeContinueMeta" class="home-muted"></p>
+            </div>
+            <button type="button" id="homeContinueButton" class="home-primary">Continue</button>
+        </section>
+
+        <section class="home-tiles" aria-label="Kinds of people">
+            <button type="button" class="home-tile" data-kind="pal" aria-pressed="false">
+                <span class="home-tile-name">Pals</span>
+                <span class="home-tile-desc">Light, easygoing friends for a quick chat.</span>
+                <span class="home-tile-count" data-count="pal"></span>
+            </button>
+            <button type="button" class="home-tile" data-kind="character" aria-pressed="false">
+                <span class="home-tile-name">Characters</span>
+                <span class="home-tile-desc">People from character cards, in their own story.</span>
+                <span class="home-tile-count" data-count="character"></span>
+            </button>
+            <button type="button" class="home-tile" data-kind="companion" aria-pressed="false">
+                <span class="home-tile-name">Companions</span>
+                <span class="home-tile-desc">Deep companions with memory, notes and a shared story.</span>
+                <span class="home-tile-count" data-count="companion"></span>
+            </button>
+        </section>
+
+        <section class="home-people" aria-labelledby="homeGalleryTitle">
+            <div class="home-section-head">
+                <h2 id="homeGalleryTitle">Everyone</h2>
+                <div class="home-section-actions">
+                    <button type="button" id="homeMakePal" hidden>Make a pal</button>
+                    <button type="button" id="homeImportCard" hidden>Import a card</button>
+                    <button type="button" id="homeWriteCompanion" hidden>Write a companion</button>
+                    <button type="button" id="homeShowAll" hidden>Show everyone</button>
+                </div>
+            </div>
+            <div id="homeKindNote" class="home-note" hidden></div>
+            <div id="homeGallery" class="home-gallery"></div>
+            <input type="file" id="homeCardFile" accept=".png,.json,image/png,application/json" hidden>
+        </section>
+    </main>
+
+    <dialog id="palDialog" class="home-dialog" aria-labelledby="palDialogTitle">
+        <form id="palForm">
+            <h2 id="palDialogTitle">Make a pal</h2>
+            <label class="home-field">Name<input id="palName" maxlength="40" autocomplete="off" required></label>
+            <fieldset class="home-field">
+                <legend>Vibe</legend>
+                <div id="palVibes" class="home-vibes"></div>
+            </fieldset>
+            <div class="home-voice">
+                <label class="home-field">Voice<select id="palVoice"></select></label>
+                <button type="button" id="palVoiceSample">Play a sample</button>
+            </div>
+            <label class="home-check" id="palKidsRow" hidden><input type="checkbox" id="palKids"><span><strong>Kids mode</strong> — for a child to talk to: child-friendly topics, no web search, no check-ins. A guardrail, not a guarantee.</span></label>
+            <p class="home-muted">Pals start light: they don't keep memories, notes or a story between chats. You can switch those on later in the pal's settings.</p>
+            <p id="palStatus" class="home-status" role="status" aria-live="polite"></p>
+            <div class="home-dialog-actions">
+                <button type="button" id="palCancel">Cancel</button>
+                <button type="submit" id="palCreate" class="home-primary">Make pal</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="palSettingsDialog" class="home-dialog" aria-labelledby="palSettingsTitle">
+        <form id="palSettingsForm">
+            <h2 id="palSettingsTitle">Pal settings</h2>
+            <p id="palSettingsVibe" class="home-muted"></p>
+            <label class="home-field" id="palSettingsNameRow">Name<input id="palSettingsName" maxlength="40" autocomplete="off"></label>
+            <details class="home-field home-persona" id="palSettingsPersonaRow" hidden>
+                <summary>Who they are</summary>
+                <label class="home-field">About<textarea id="palSettingsAbout" maxlength="400" rows="2"></textarea></label>
+                <label class="home-field">Traits, one per line<textarea id="palSettingsTraits" rows="3"></textarea></label>
+                <div class="home-pair">
+                    <label class="home-field">Tone<input id="palSettingsTone" maxlength="120" autocomplete="off"></label>
+                    <label class="home-field">Formality<input id="palSettingsFormality" maxlength="120" autocomplete="off"></label>
+                </div>
+                <label class="home-field">Humour<input id="palSettingsHumor" maxlength="120" autocomplete="off"></label>
+                <label class="home-check"><input type="checkbox" id="palSettingsEmojis"><span>Uses emojis</span></label>
+                <label class="home-field">Interests, one per line<textarea id="palSettingsInterests" rows="3"></textarea></label>
+                <label class="home-field">Quirks, one per line<textarea id="palSettingsQuirks" rows="3"></textarea></label>
+                <p class="home-muted">Up to 8 traits, 8 interests and 6 quirks. The same rules apply as when a pal is made, and a pal in kids mode keeps to child-friendly topics. Saved to the pal's pal.yaml.</p>
+            </details>
+            <div class="home-voice" id="palSettingsVoiceRow">
+                <label class="home-field">Voice<select id="palSettingsVoice"></select></label>
+                <button type="button" id="palSettingsVoiceSample">Play a sample</button>
+            </div>
+            <fieldset class="home-field" id="palSettingsRepliesRow">
+                <legend>Replies</legend>
+                <div class="home-pair">
+                    <label class="home-field">Temperature<input id="palSettingsTemperature" type="number" step="0.05" min="0" max="2" inputmode="decimal"></label>
+                    <label class="home-field">Reply length<input id="palSettingsLength" type="number" step="1" min="64" max="32768" inputmode="numeric"></label>
+                </div>
+                <p id="palSettingsRepliesHint" class="home-muted">Leave a box empty to use the setting in Settings → Replies.</p>
+            </fieldset>
+            <fieldset class="home-field" id="palSettingsPortraitRow" hidden>
+                <legend>Portrait</legend>
+                <div class="home-portrait-row">
+                    <img id="palSettingsPortrait" class="home-portrait-small" alt="">
+                    <p id="palSettingsPortraitFrom" class="home-muted"></p>
+                </div>
+                <div class="home-buttons">
+                    <button type="button" id="palSettingsPortraitMake">Make a portrait in NPC Forge…</button>
+                    <button type="button" id="palSettingsPortraitLibrary">Choose from NPC Forge's library…</button>
+                    <button type="button" id="palSettingsPortraitUpload" hidden>Upload a picture…</button>
+                    <button type="button" id="palSettingsPortraitLife" hidden>Bring it to life</button>
+                    <label class="home-field" id="palSettingsLivingEngineRow" hidden>Redraw engine for the living portrait<select id="palSettingsLivingEngine"></select></label>
+                    <button type="button" id="palSettingsPortraitUndo" hidden>Use the card's picture again</button>
+                </div>
+                <input type="file" id="palSettingsPortraitFile" accept="image/png,.png" hidden>
+            </fieldset>
+            <fieldset class="home-field" id="palSettingsFeaturesRow">
+                <legend id="palSettingsKeeps">What this pal keeps</legend>
+                <label class="home-check"><input type="checkbox" data-feature="memory"><span><strong>Memory</strong> — remember facts you share</span></label>
+                <label class="home-check"><input type="checkbox" data-feature="notes"><span><strong>Notes</strong> — keep notes about you and your chats</span></label>
+                <label class="home-check"><input type="checkbox" data-feature="story"><span><strong>Story</strong> — saved moments and reflection</span></label>
+                <label class="home-check"><input type="checkbox" data-feature="presence"><span><strong>Check-ins</strong> — allow presence messages (Presence must also be switched on in the chat)</span></label>
+            </fieldset>
+            <fieldset class="home-field" id="palSettingsKidsRow" hidden>
+                <legend>Kids mode</legend>
+                <label class="home-check" id="palSettingsKidsSwitch"><input type="checkbox" id="palSettingsKids"><span><strong>Kids mode for this pal</strong> — child-friendly topics only, no web search, no check-ins and no pictures. A guardrail, not a guarantee.</span></label>
+                <label class="home-field" id="palSettingsKidsPinRow" hidden>Parent PIN<input id="palSettingsKidsPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"></label>
+                <p id="palSettingsKidsPinHint" class="home-muted" hidden>Enter the parent PIN to switch this pal into or out of kids mode.</p>
+                <p id="palSettingsKidsLocked" class="home-muted">Kids mode is locked on this Altera. A grown-up can set it up here.</p>
+                <div><button type="button" id="palSettingsKidsAbout">About kids mode</button></div>
+            </fieldset>
+            <fieldset class="home-field" id="palSettingsCardRow" hidden>
+                <legend>The card</legend>
+                <label class="home-check"><input type="checkbox" id="palSettingsInstructions"><span><strong>Use the card's own instructions</strong> — its system prompt and post-history instructions. Altera's own rules still apply.</span></label>
+                <label class="home-check" id="palSettingsLorebookRow" hidden><input type="checkbox" id="palSettingsLorebook"><span><strong>Use the card's lorebook</strong> — <span id="palSettingsLorebookCount"></span></span></label>
+                <div id="palSettingsBookBox" class="home-notes" hidden>
+                    <p class="home-eyebrow">Lorebook entries (an entry goes into the chat when its keys come up)</p>
+                    <ul id="palSettingsBook" class="home-book"></ul>
+                </div>
+                <div id="palSettingsNotesBox" class="home-notes" hidden>
+                    <p class="home-eyebrow">Creator's notes (shown here only, never sent to a model)</p>
+                    <p id="palSettingsNotes"></p>
+                </div>
+            </fieldset>
+            <div id="palSettingsWrittenRow" hidden><button type="button" id="palSettingsEditCard">Edit who they are…</button></div>
+            <p id="palSettingsStatus" class="home-status" role="status" aria-live="polite"></p>
+            <div class="home-dialog-actions">
+                <button type="button" id="palSettingsCancel">Cancel</button>
+                <button type="submit" id="palSettingsSave" class="home-primary">Save</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog id="companionDialog" class="home-dialog" aria-labelledby="companionDialogTitle">
+        <form id="companionForm" novalidate>
+            <h2 id="companionDialogTitle">Write a companion</h2>
+            <p class="home-muted">A companion keeps memory, notes and a story, and grows with you. Everything here is what they know about themselves; you can change it later in their settings.</p>
+            <div class="home-row">
+                <label class="home-field">Name<input id="companionName" maxlength="40" autocomplete="off" required></label>
+                <label class="home-field">Age<input id="companionAge" type="number" min="18" max="120" inputmode="numeric" required></label>
+                <label class="home-field">Gender<select id="companionGender">
+                    <option value="">Not said</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="nonbinary">Non-binary</option>
+                </select></label>
+            </div>
+            <label class="home-field">Who they are<textarea id="companionBio" rows="4" maxlength="1200" placeholder="What their life is like, and how they came to be here"></textarea></label>
+            <label class="home-field">Hobbies<input id="companionHobbies" maxlength="400" autocomplete="off" placeholder="Reading, long walks, bad puns (separate with commas)"></label>
+            <label class="home-field">How they talk<textarea id="companionSpeech" rows="2" maxlength="400" placeholder="Warm and direct, a little dry"></textarea></label>
+            <label class="home-field">How they come across<textarea id="companionDemeanor" rows="2" maxlength="400" placeholder="Calm, curious, quick to laugh"></textarea></label>
+            <label class="home-field">A quirk<textarea id="companionQuirk" rows="2" maxlength="400" placeholder="Names every houseplant"></textarea></label>
+            <label class="home-field">Something they want<textarea id="companionGoal" rows="2" maxlength="400" placeholder="To open a tiny bookshop by the sea"></textarea></label>
+            <label class="home-field">A pet peeve<textarea id="companionPeeve" rows="2" maxlength="400" placeholder="People who are cruel to waiters"></textarea></label>
+            <p class="home-muted">Only a name and an age are needed. Ages are 18 or older, and the text passes the same safety rules as an imported companion.</p>
+            <p id="companionStatus" class="home-status" role="status" aria-live="polite"></p>
+            <div class="home-dialog-actions">
+                <button type="button" id="companionCancel">Cancel</button>
+                <button type="submit" id="companionSubmit" class="home-primary">Make companion</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog id="kidsDialog" class="home-dialog" aria-labelledby="kidsDialogTitle">
+        <form id="kidsForm">
+            <h2 id="kidsDialogTitle">Kids mode</h2>
+            <p><strong>Kids mode is a guardrail, not a certification.</strong> It is not a parental-control product and it has not been tested or approved as one.</p>
+            <div class="home-notes">
+                <p class="home-eyebrow">What it does, for a pal in kids mode</p>
+                <p>Tells the model it is talking with a child and to keep to child-friendly topics. Answers messages about self-harm, sex and romance, drugs and alcohol, violence, gambling or personal details with a fixed reply instead of the model, and points to a trusted grown-up. Checks each reply before it is shown and replaces one that strays. Turns off web search, pictures, check-ins and other messages the pal would start itself.</p>
+            </div>
+            <div class="home-notes">
+                <p class="home-eyebrow">What it cannot do</p>
+                <p>It works from word lists and instructions, so it will miss some things, and the model can still get things wrong. It does not stop anyone opening other people on this device, or changing these settings. A grown-up still needs to keep an eye on things.</p>
+            </div>
+            <div id="kidsSetupFields">
+                <label class="home-field">Parent PIN<input id="kidsPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"></label>
+                <label class="home-field" id="kidsPinRepeatRow">Repeat PIN<input id="kidsPinRepeat" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"></label>
+                <p class="home-muted">4 to 8 digits. A grown-up needs this PIN to leave kids mode, change it, or switch a pal out of kids mode.</p>
+            </div>
+            <div id="kidsChangeFields" hidden>
+                <label class="home-field">Current PIN<input id="kidsCurrentPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"></label>
+                <label class="home-field">New PIN<input id="kidsNewPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"></label>
+                <label class="home-field">Repeat new PIN<input id="kidsNewPinRepeat" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"></label>
+            </div>
+            <label class="home-check" id="kidsUnderstoodRow"><input type="checkbox" id="kidsUnderstood"><span>I understand that kids mode is a guardrail, not a guarantee, and that an adult still needs to supervise.</span></label>
+            <p id="kidsStatus" class="home-status" role="status" aria-live="polite"></p>
+            <div class="home-dialog-actions">
+                <button type="button" id="kidsCancel">Close</button>
+                <button type="button" id="kidsLock" hidden>Lock kids mode</button>
+                <button type="button" id="kidsChangePin" hidden>Change PIN</button>
+                <button type="submit" id="kidsEnable" class="home-primary">Enable kids mode</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog id="portraitDialog" class="home-dialog" aria-labelledby="portraitTitle">
+        <form id="portraitForm">
+            <h2 id="portraitTitle">A portrait from NPC Forge</h2>
+            <p id="portraitForge" class="home-muted"></p>
+            <div><button type="button" id="portraitForgeStart" hidden>Start NPC Forge</button></div>
+            <fieldset class="home-field" id="portraitFromRow">
+                <legend>Paint it from</legend>
+                <label class="home-check" id="portraitFromCardRow"><input type="radio" name="portraitFrom" value="card" id="portraitFromCard"><span><strong>The card's picture</strong> — keeps the face and redraws the rest in the style you choose</span></label>
+                <label class="home-check"><input type="radio" name="portraitFrom" value="description" id="portraitFromWords"><span><strong>A description</strong> — the words below are all NPC Forge draws from</span></label>
+            </fieldset>
+            <label class="home-field" id="portraitDescriptionRow">How they look<textarea id="portraitDescription" rows="5" maxlength="1500" placeholder="Short curly red hair, green eyes, freckles, a yellow raincoat"></textarea></label>
+            <div id="portraitAskRow"><button type="button" id="portraitAsk">Ask the model to write it</button></div>
+            <label class="home-field">Art style<select id="portraitStyle"></select></label>
+            <label class="home-field">Setting<select id="portraitSetting"></select></label>
+            <label class="home-field">Gender<select id="portraitGender">
+                <option value="">As the description says</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="nonbinary">Non-binary</option>
+            </select></label>
+            <label class="home-field" id="portraitImageRow">Picture engine<select id="portraitImageModel"></select></label>
+            <label class="home-field" id="portraitEditRow">Redraw engine<select id="portraitEditModel"></select></label>
+            <p id="portraitEngineNote" class="home-muted"></p>
+            <p class="home-muted">NPC Forge keeps the character it makes in its own library, where you can work on it further. Every portrait goes through the age check before it is used.</p>
+            <p id="portraitStatus" class="home-status" role="status" aria-live="polite"></p>
+            <div class="home-dialog-actions">
+                <button type="button" id="portraitClose">Close</button>
+                <button type="button" id="portraitStop" hidden>Stop painting</button>
+                <button type="submit" id="portraitPaint" class="home-primary">Paint portrait</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog id="libraryDialog" class="home-dialog" aria-labelledby="libraryTitle">
+        <form id="libraryForm">
+            <h2 id="libraryTitle">Choose from NPC Forge's library</h2>
+            <p class="home-muted">Use the portrait of a character you already made in NPC Forge. Nothing is painted, and the character stays in NPC Forge. The portrait goes through the age check before it is used.</p>
+            <div id="libraryGrid" class="home-library" role="list"></div>
+            <p id="libraryStatus" class="home-status" role="status" aria-live="polite"></p>
+            <div class="home-dialog-actions">
+                <button type="button" id="libraryClose">Close</button>
+            </div>
+        </form>
+    </dialog>
+    <script src="{{ url_for('static', filename='js/checkin-notices.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+</body>
+</html>

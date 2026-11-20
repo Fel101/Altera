@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0f0d15">
+    <title>{{ personality.name }} — Our story</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/story.css') }}">
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }}; try { AlteraPage.ready(() => { document.documentElement.dataset.theme = AlteraStorage.local.getItem('altera_theme') || 'dark'; }); } catch (_) {}</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</head>
+<body class="story-page">
+    <a class="story-skip" href="#storyEpisodes">Skip to episodes</a>
+    <main class="story-shell" id="storyPage">
+        <header class="story-head">
+            <div><a href="/">← Back to chat</a><p class="story-eyebrow">A story you can inspect</p><h1>Our story</h1><p>Keep the exchanges that matter. Leave room for uncertainty.</p></div>
+            <a href="/memory" id="storyMemoryLink">Memory controls</a>
+        </header>
+        <section class="story-toolbar" aria-label="Choose companion and filter episodes">
+            <label>Companion<select id="storyScope" disabled></select></label>
+            <label>Find an episode<input type="search" id="storySearch" placeholder="Search title or saved text"></label>
+            <label>Show<select id="storyFilter"><option value="story">Our story</option><option value="all">All episodes</option><option value="pinned">Pinned</option><option value="review">Needs review</option></select></label>
+            <button type="button" id="storyRefresh" disabled>Refresh saved state</button>
+        </section>
+        <p id="storyStatus" class="story-status" role="status" aria-live="polite">Loading companions…</p>
+        <p id="storyBoundary" class="story-notice" hidden></p>
+        <p id="storyBudget" class="story-muted"></p>
+        <section class="story-guide" aria-label="How to read this story">
+            <p><strong>Actual exchange</strong> records what was said. It does not establish that a described life event happened.</p>
+            <p><strong>Imagined scene</strong> is fiction or roleplay. <strong>Derived candidate</strong> is an interpretation that may need correction.</p>
+            <p>Pins protect retrieval priority. Salience is your importance setting; extraction confidence records a supplied uncertainty score. Age can lower priority without deleting saved episodes.</p>
+        </section>
+        <section aria-labelledby="storyEpisodesTitle" id="storyEpisodes" tabindex="-1">
+            <div class="story-section-head"><div><p class="story-eyebrow">Curated by you</p><h2 id="storyEpisodesTitle">Saved moments</h2></div><span id="storyCount" class="story-muted"></span></div>
+            <div id="storyCards" class="story-cards"></div>
+        </section>
+        <details class="story-panel" id="storyCreatePanel">
+            <summary>Save an exchange or imagined scene</summary>
+            <p class="story-muted">Choose one or two messages from this conversation. Review their current text before saving. No milestone or event is added automatically.</p>
+            <form id="storyCreateForm" class="story-form">
+                <div class="story-form-grid"><label>Title<input id="storyTitle" maxlength="160" required disabled></label><label>Source label<select id="storyKind" disabled><option value="actual_exchange">Actual exchange</option><option value="imagined_scene">Imagined scene</option><option value="derived_summary">Derived candidate / your interpretation</option></select></label></div>
+                <label>Your description<textarea id="storySummary" maxlength="1200" rows="3"></textarea></label>
+                <label>Uncertainty or qualification<textarea id="storyUncertainty" maxlength="400" rows="2" placeholder="What should this person avoid assuming?"></textarea></label>
+                <div class="story-form-grid"><label>First message<select id="storySourceOne" required disabled><option value="">Choose a message…</option></select></label><label>Second message (optional)<select id="storySourceTwo" disabled><option value="">No second message</option></select></label></div>
+                <p id="storySourceStatus" class="story-muted" role="status" aria-live="polite">Choose a companion to see recent messages.</p>
+                <button type="button" id="storyReviewSources" disabled>Review source text</button>
+                <div id="storySourcePreview" class="story-source-preview" aria-live="polite"></div>
+                <div class="story-form-grid"><label>Salience<select id="storySalience" disabled><option value="1">1 · Low</option><option value="2">2</option><option value="3" selected>3 · Medium</option><option value="4">4</option><option value="5">5 · High</option></select></label><label class="story-check"><input id="storyInStory" type="checkbox" checked disabled>Include in Our story as your curation</label></div>
+                <div class="story-actions"><button type="submit" id="storyCreate" disabled>Save reviewed episode</button><button type="button" id="storyDiscardAttempt" hidden>Stop retrying this save</button></div>
+            </form>
+        </details>
+        <section class="story-panel story-reflection" aria-labelledby="storyReflectionTitle">
+            <div class="story-section-head"><div><p class="story-eyebrow">Optional, bounded work</p><h2 id="storyReflectionTitle">Reflection</h2></div><span id="storyReflectionState" class="story-pill">Off until you opt in</span></div>
+            <p>Reflection can propose episodes and current notes from eligible conversations. Generated reflections are derived material, never independent evidence for a life event.</p>
+            <p class="story-muted">Opening or refreshing this page reads saved state. Run reflection deliberately, or separately enable its schedule below. Presence consent does not enable reflection.</p>
+            <p id="storyProvider" class="story-provider"></p>
+            <form id="storyReflectionForm" class="story-form">
+                <label class="story-check"><input type="checkbox" id="storyReflectionEnabled" disabled>Enable scheduled reflection for this companion</label>
+                <div class="story-form-grid"><label>Timezone<input id="storyTimezone" maxlength="80" placeholder="America/New_York" disabled></label><label>Interval (minutes)<input id="storyInterval" type="number" min="60" max="10080" step="1" value="1440" disabled></label><label>Minimum cooldown (minutes)<input id="storyCooldown" type="number" min="60" max="10080" step="1" value="1440" disabled></label><label>Daily job cap (0 pauses jobs)<input id="storyDailyCap" type="number" min="0" max="2" value="1" disabled></label></div>
+                <label class="story-check"><input id="storyQuietEnabled" type="checkbox" checked disabled>Respect quiet hours</label>
+                <div class="story-form-grid"><label>Quiet hours start<input id="storyQuietStart" type="time" value="22:00" disabled></label><label>Quiet hours end<input id="storyQuietEnd" type="time" value="08:00" disabled></label></div>
+                <label class="story-check"><input type="checkbox" id="storyNetworkApproval" disabled><span id="storyNetworkText">Network approval is separate from enabling reflection.</span></label>
+                <div class="story-actions"><button type="submit" id="storySaveReflection" disabled>Save reflection preferences</button><button type="button" id="storyReloadReflection" disabled>Reload preferences</button></div>
+            </form>
+            <p id="storyReflectionStatus" class="story-status" role="status" aria-live="polite"></p>
+            <div class="story-actions"><button type="button" id="storyRunReflection" disabled>Request one reflection</button><button type="button" id="storyRefreshReports" disabled>Refresh run reports</button></div>
+            <p class="story-muted">A request queues bounded work; it may wait for quiet hours or the frequency budget. Refresh reports to see its outcome. This page does not poll.</p>
+            <div id="storyReports"></div>
+        </section>
+        <footer class="story-footer"><p>Correct and Forget affect this companion’s derived context. Existing backups retain their original contents. Use <a href="/memory" id="storyFooterMemoryLink">Memory controls</a> to inspect broader recall boundaries.</p></footer>
+    </main>
+    <script src="{{ url_for('static', filename='js/story.js') }}"></script>
+</body>
+</html>

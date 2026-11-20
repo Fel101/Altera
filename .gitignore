@@ -1,0 +1,30 @@
+# Python/runtime
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Local app state
+data/
+# scratch files written from the chat drawer
+workspace/
+static/audio/
+server.log
+
+# Local snapshots and machine-specific config
+backup/
+backups/
+/config.yaml
+config.local.yaml
+user_profile.local.yaml
+
+# Credentials. altera.py calls load_dotenv(), so this is where API keys belong.
+.env
+.env.*
+!.env.example
+
+# Personal data and agent state that must not be versioned
+user_profile.yaml
+.hermes/
+*.before-*

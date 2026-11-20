@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{ personality.name }} — Memories</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/backup.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/knowledge.css') }}">
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }}; AlteraPage.ready(() => { document.documentElement.dataset.theme = AlteraStorage.local.getItem('altera_theme') || 'dark'; });</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</head>
+<body class="knowledge-page">
+    <main class="knowledge-shell" id="knowledgePage">
+        <header class="knowledge-head"><div><a href="/">← Back to chat</a><h1>What is remembered</h1><p>Facts you can inspect, correct or ask to be forgotten.</p></div></header>
+        <section class="knowledge-toolbar" aria-label="Choose companion and search">
+            <label>Companion<select id="knowledgeScope" disabled></select></label>
+            <label>Search memories<input id="knowledgeSearch" type="search" placeholder="Search facts, preferences and events"></label>
+        </section>
+        <p id="knowledgeStatus" role="status" aria-live="polite">Loading companions…</p>
+        <section id="knowledgeRepair" class="knowledge-banner" hidden><h2 id="knowledgeRepairTitle">The conversation changed</h2><p id="knowledgeRepairText">Old derived facts and notes are paused. Rebuild automatic memories from the current chat to use them again. Manually added or corrected facts stay; changed sources need review.</p><button type="button" id="repairKnowledge">Rebuild automatic memories</button></section>
+        <p id="knowledgeBoundary" class="knowledge-muted" hidden></p>
+        <details><summary>Notebook sources</summary><p id="knowledgeNoteSources" class="knowledge-muted">Choose a companion to inspect notebook sources.</p></details>
+        <section class="knowledge-report" aria-labelledby="knowledgeReportTitle">
+            <h2 id="knowledgeReportTitle">What is known about you</h2>
+            <p>Inspect this companion’s saved facts, current notebook and conversation context. Eligible inputs can be used by a reply; this report does not say which inputs a reply actually received.</p>
+            <div class="knowledge-actions"><button type="button" id="viewKnowledgeReport">Show current report</button><button type="button" data-report-export="json">Download report JSON</button><button type="button" data-report-export="markdown">Download report Markdown</button></div>
+            <p id="knowledgeReportStatus" role="status" aria-live="polite"></p>
+            <div id="knowledgeReportContent"></div>
+        </section>
+        <section class="knowledge-new" aria-labelledby="rememberTitle"><h2 id="rememberTitle">Remember something</h2>
+            <form id="rememberForm"><label>Fact, preference or event<textarea id="knowledgeContent" required maxlength="10000" rows="2" placeholder="For example: I prefer tea without sugar."></textarea></label>
+                <label>Type<select id="knowledgeType"><option value="fact">Fact</option><option value="preference">Preference</option><option value="event">Event</option><option value="relationship">Relationship</option></select></label>
+                <button type="submit" disabled>Remember</button></form>
+        </section>
+        <section aria-label="Saved memories"><div class="knowledge-section-head"><h2>Saved memories</h2><span id="knowledgeCount"></span></div><div id="knowledgeCards"></div></section>
+        <section class="knowledge-tools" aria-labelledby="knowledgeToolsTitle"><h2 id="knowledgeToolsTitle">Manage your data</h2>
+            <button type="button" id="knowledgeDuplicates">Review duplicates</button>
+            <button type="button" id="forgetCompanion">Forget all memories for this companion</button>
+            <p class="knowledge-muted">Correcting or forgetting a fact clears this companion’s notes and their history, and stops sending earlier conversation text to the model. Other memories remain. Saved backups still contain their original data.</p>
+            <details><summary>Export all companions and conversations</summary><div class="knowledge-actions"><button type="button" data-export="json">JSON</button><button type="button" data-export="markdown">Markdown</button><button type="button" data-export="pdf">PDF</button></div><p>Use Backup and restore in chat Settings for a complete restorable copy.</p></details>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/knowledge.js') }}"></script>
+</body>
+</html>

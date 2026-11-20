@@ -1,0 +1,42 @@
+<div id="presenceBanner" class="presence-banner" role="status" hidden>
+    <span id="presenceBannerText"></span><button type="button" id="presenceOpenInbox">Open inbox</button>
+</div>
+<dialog id="presenceDialog" class="backup-dialog presence-dialog" aria-labelledby="presenceTitle">
+    <header><h2 id="presenceTitle">Companion presence</h2><button type="button" id="presenceClose" aria-label="Close companion presence">×</button></header>
+    <p>Presence starts off for each companion. If you enable it, generated messages wait in this inbox until you choose to add one to its original conversation. Nothing plays automatically.</p>
+    <p id="presenceStatus" role="status" aria-live="polite"></p>
+    <section aria-labelledby="presenceInboxTitle">
+        <h3 id="presenceInboxTitle">Inbox</h3>
+        <button type="button" id="presenceRefresh">Refresh inbox</button><button type="button" id="presenceCheckNow" disabled>Check now</button>
+        <div id="presenceInbox"></div><div id="presenceJobs" aria-label="Recent presence work"></div>
+    </section>
+    <section aria-labelledby="presencePreferencesTitle">
+        <h3 id="presencePreferencesTitle">This companion’s preferences</h3>
+        <p id="presenceScope"></p><p id="presenceProvider"></p>
+        <form id="presencePreferences">
+            <label><input type="checkbox" id="presenceEnabled" disabled> Enable presence for this companion</label>
+            <label for="presenceTimezone">Timezone (IANA name)</label><input type="text" id="presenceTimezone" placeholder="America/New_York" required disabled>
+            <label><input type="checkbox" id="presenceQuietEnabled" disabled> Use quiet hours</label>
+            <label for="presenceQuietStart">Quiet hours start</label><input type="time" id="presenceQuietStart" value="22:00" required disabled>
+            <label for="presenceQuietEnd">Quiet hours end</label><input type="time" id="presenceQuietEnd" value="08:00" required disabled>
+            <p>Quiet hours use the saved timezone and can cross midnight. Equal start and end times mean quiet all day.</p>
+            <label for="presenceInterval">Check-in interval (minutes)</label><input type="number" id="presenceInterval" min="15" max="1440" value="360" required disabled>
+            <label for="presenceDailyCap">Daily limit (0 stops deliveries)</label><input type="number" id="presenceDailyCap" min="0" max="5" value="2" required disabled>
+            <label id="presenceNetworkLabel"><input type="checkbox" id="presenceNetworkApproval" disabled><span id="presenceNetworkText">Approve background network requests for the displayed provider and model</span></label>
+            <p>Provider approval is specific to this provider and model. Turning it off revokes background network permission.</p>
+            <button type="submit" id="presenceSave" disabled>Save preferences</button><button type="button" id="presenceReloadSettings">Reload saved preferences and rituals</button>
+        </form>
+    </section>
+    <section aria-labelledby="presenceRitualsTitle">
+        <h3 id="presenceRitualsTitle">Rituals</h3>
+        <p>Rituals use this companion’s saved timezone, quiet hours and daily limit. Creating a ritual does not enable presence.</p>
+        <div id="presenceRituals"></div>
+        <form id="presenceRitualForm">
+            <label for="presenceRitualKind">Ritual</label><select id="presenceRitualKind"><option value="greeting">Greeting</option><option value="goodnight">Goodnight</option><option value="weekly">Weekly check-in</option></select>
+            <label for="presenceRitualTime">Local time</label><input type="time" id="presenceRitualTime" value="08:00" required>
+            <label for="presenceRitualWeekday">Weekly day</label><select id="presenceRitualWeekday"><option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option><option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option></select>
+            <label><input type="checkbox" id="presenceRitualEnabled" checked> Ritual enabled</label>
+            <button type="submit" id="presenceRitualSave" disabled>Add ritual</button><button type="button" id="presenceRitualCancel">Cancel ritual edit</button>
+        </form>
+    </section>
+</dialog>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ personality.name }} — Search Conversations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .search-page { display: flex; height: 100vh; }
+
+        /* Sidebar */
+        .search-sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            gap: 16px;
+        }
+
+        .search-sidebar h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .search-back-btn:hover { background: var(--bg-hover); }
+
+        /* Search area */
+        .search-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        .search-header {
+            padding: 32px 40px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .search-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 111, 247, 0.1);
+        }
+
+        .search-input-wrapper svg {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124, 111, 247, 0.3); }
+
+        /* Filters */
+        .filters-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select, .filter-input {
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--accent); }
+
+        /* Results */
+        .search-results { flex: 1; overflow-y: auto; padding: 24px 40px; background: var(--bg-primary); }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .result-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .result-item:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(124, 111, 247, 0.1); }
+
+        .result-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .result-mood-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .mood-happy { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+        .mood-sad { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+        .mood-angry { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .mood-anxious { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .mood-excited { background: rgba(192, 132, 252, 0.15); color: #c084fc; }
+        .mood-calm { background: rgba(103, 232, 249, 0.15); color: #67e8f9; }
+        .mood-lonely { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
+        .mood-grateful { background: rgba(244, 114, 182, 0.15); color: #f472b6; }
+        .mood-frustrated { background: rgba(251, 146, 60, 0.15); color: #fb923c; }
+        .mood-neutral { background: var(--bg-tertiary); color: var(--text-secondary); }
+
+        .result-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .result-highlight { background: rgba(124, 111, 247, 0.2); padding: 2px 4px; border-radius: 3px; color: var(--accent-hover); font-weight: 500; }
+
+        /* Stats */
+        .search-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value { font-size: 1.5rem; font-weight: 600; color: var(--accent-hover); margin-bottom: 4px; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon { font-size: 3rem; margin-bottom: 16px; }
+
+        /* Loading */
+        .search-loading { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .search-loading .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-page { flex-direction: column; }
+            .search-sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 12px; }
+            .search-header, .search-results { padding-left: 16px; padding-right: 16px; }
+        }
+    </style>
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }};</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</head>
+<body>
+    <div class="search-page" id="searchPage">
+        <!-- Sidebar -->
+        <aside class="search-sidebar">
+            <h1>{{ personality.name }}</h1>
+            
+            <a href="/" class="search-back-btn">← Back to Chat</a>
+
+            <button class="search-back-btn" id="searchStats" style="margin-top: 8px;">📊 View Stats</button>
+
+            <!-- Quick filters -->
+            <div style="padding: 16px; background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                <h3 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">Quick Filters</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="quick-filter" data-search-term="happy" style="padding: 8px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; text-align: left;">😊 Happy moments</button>
+                    <button class="quick-filter" data-search-term="stressed" style="padding: 8px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; text-align: left;">😰 Stressed moments</button>
+                    <button class="quick-filter" data-search-term="person" style="padding: 8px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; text-align: left;">👥 People mentions</button>
+                    <button class="quick-filter" data-search-term="place" style="padding: 8px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; text-align: left;">📍 Places mentioned</button>
+                </div>
+            </div>
+
+            <button class="settings-btn" id="auxSettings" aria-controls="settingsPanel" aria-expanded="false" style="margin-top: auto;">⚙️ Settings</button>
+        </aside>
+
+        <!-- Search Content -->
+        <main class="search-content">
+            <div class="search-header">
+                <h2>Search Conversations</h2>
+                
+                <form class="search-box" id="searchForm">
+                    <div class="search-input-wrapper">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="searchInput" placeholder="Search your conversations...">
+                    </div>
+                    <button class="search-btn" type="submit">Search</button>
+                </form>
+
+                <div class="filters-row">
+                    <select class="filter-select" id="moodFilter">
+                        <option value="">All moods</option>
+                        <option value="happy">😊 Happy</option>
+                        <option value="sad">😢 Sad</option>
+                        <option value="angry">😠 Angry</option>
+                        <option value="anxious">😰 Anxious</option>
+                        <option value="excited">🤩 Excited</option>
+                        <option value="calm">😌 Calm</option>
+                        <option value="lonely">🥺 Lonely</option>
+                        <option value="grateful">🙏 Grateful</option>
+                        <option value="frustrated">😤 Frustrated</option>
+                    </select>
+
+                    <input type="date" class="filter-input" id="dateFrom" title="From date">
+                    <span style="color: var(--text-muted); align-self: center;">to</span>
+                    <input type="date" class="filter-input" id="dateTo" title="To date">
+
+                    <select class="filter-select" id="roleFilter">
+                        <option value="">All roles</option>
+                        <option value="user">User messages only</option>
+                        <option value="assistant">Assistant messages only</option>
+                    </select>
+
+                    <input type="number" class="filter-input" id="limitInput" placeholder="Limit" value="50" min="10" max="200" style="width: 80px;">
+                </div>
+            </div>
+
+            <!-- Stats bar -->
+            <div class="search-stats" id="statsBar">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalMessages">-</div>
+                    <div class="stat-label">Total Messages</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSessions">-</div>
+                    <div class="stat-label">Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="resultCount">0</div>
+                    <div class="stat-label">Results Found</div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="search-results" id="resultsContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <h3>Search your conversations</h3>
+                    <p>Type a query above to find messages, memories, and moments.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel" role="region" aria-label="View settings" aria-hidden="true">
+        <div class="settings-header"><h3>Settings</h3><button type="button" class="close-btn" id="auxCloseSettings" aria-label="Close settings">×</button></div>
+        <div class="settings-content">
+            <p>Use the filters above to narrow this search. Manage voice and companion preferences in chat Settings.</p>
+            <a href="/">Open chat settings</a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/auxiliary.js') }}"></script>
+</body>
+</html>

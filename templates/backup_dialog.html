@@ -1,0 +1,60 @@
+<dialog id="backupDialog" class="backup-dialog" aria-labelledby="backupTitle">
+    <header><h2 id="backupTitle">Backup and restore</h2><button type="button" id="backupClose" aria-label="Close backup and restore">×</button></header>
+    <p>Save conversations, memories, companions, pictures, notes and preferences. Browser-only voice recordings are not included; save those separately. API keys and remote access are excluded. Backup encryption protects the archive; it does not encrypt Altera’s running storage.</p>
+    <label class="backup-check"><input id="backupEncrypted" type="checkbox" checked> Encrypt this backup</label>
+    <div id="backupPasswordFields" class="backup-fields">
+        <label for="backupPassword">Backup password</label>
+        <input id="backupPassword" type="password" autocomplete="new-password" maxlength="1024" spellcheck="false" aria-describedby="backupPasswordHint">
+        <label for="backupPasswordConfirm">Confirm backup password</label>
+        <input id="backupPasswordConfirm" type="password" autocomplete="new-password" maxlength="1024" spellcheck="false">
+        <p class="backup-hint" id="backupPasswordHint">At least 12 characters, at most 1,024 UTF-8 bytes. Spaces count and are preserved. Keep the password separately; Altera cannot reset it.</p>
+        <label class="backup-check"><input id="backupRecoveryKey" type="checkbox"> Also generate a one-time recovery key</label>
+    </div>
+    <p class="backup-warning" id="backupPlaintextWarning" hidden>Plaintext ZIP selected. Anyone who obtains the file can read its conversations, recordings and other contents.</p>
+    <button type="button" id="backupCreate">Create backup</button>
+    <p class="backup-hint">Backups are saved on this PC. Download a copy to keep it somewhere else.</p>
+    <section id="backupRecoveryKeyPanel" hidden aria-labelledby="backupRecoveryKeyTitle">
+        <h3 id="backupRecoveryKeyTitle">One-time recovery key</h3>
+        <p class="backup-hint">Keep this separately from the encrypted backup. It disappears when this dialog closes or a new backup replaces it. Altera does not save it for you.</p>
+        <label for="backupRecoveryKeyValue">Generated recovery key</label>
+        <textarea id="backupRecoveryKeyValue" readonly rows="3" autocomplete="off" spellcheck="false"></textarea>
+        <button type="button" id="backupRecoveryKeyDownload" disabled>Download recovery key</button>
+    </section>
+    <p id="backupStatus" role="status" aria-live="polite"></p>
+    <section aria-labelledby="savedBackupsTitle"><h3 id="savedBackupsTitle">Saved backups</h3><div id="backupList"></div></section>
+    <section aria-labelledby="restoreTitle">
+        <h3 id="restoreTitle">Restore a backup</h3>
+        <p class="backup-hint">Existing browser drafts are kept. Restored drafts are added for review, so you may see duplicate copies.</p>
+        <label for="backupFile">Backup file (encrypted or plaintext ZIP)</label>
+        <input id="backupFile" type="file" accept=".alterabak,.herbak,.zip,application/zip,application/octet-stream">
+        <label for="restoreUnlockMethod">Unlock method</label>
+        <select id="restoreUnlockMethod">
+            <option value="password" selected>Backup password</option>
+            <option value="recovery_key">Recovery key</option>
+            <option value="none">Plaintext ZIP — no unlock secret</option>
+        </select>
+        <div id="restoreSecretFields" class="backup-fields">
+            <label for="restoreSecret">Password or recovery key</label>
+            <input id="restoreSecret" type="password" autocomplete="off" maxlength="1024" spellcheck="false">
+            <p class="backup-hint">Needed again when applying the restore, including after a server restart. Kept only in this open dialog.</p>
+        </div>
+        <label class="backup-check"><input id="restoreConnections" type="checkbox"> Restore service connections and model/voice settings</label>
+        <p class="backup-hint">Off keeps this PC’s current connections. Turning it on may switch your model or speech to a cloud service. API keys, remote access and workspace-tool permissions stay as they are.</p>
+        <button type="button" id="backupPreview">Preview selected backup</button>
+        <div id="restorePreview" hidden></div>
+        <div id="recoverySettings" class="backup-fields">
+            <h4>Recovery backup before replacement</h4>
+            <p class="backup-hint">Choose a separate password for the backup of the data being replaced. An encrypted source requires an encrypted recovery backup.</p>
+            <label class="backup-check"><input id="recoveryEncrypted" type="checkbox" checked> Encrypt the recovery backup</label>
+            <div id="recoveryPasswordFields" class="backup-fields">
+                <label for="recoveryPassword">Recovery-backup password</label>
+                <input id="recoveryPassword" type="password" autocomplete="new-password" maxlength="1024" spellcheck="false">
+                <label for="recoveryPasswordConfirm">Confirm recovery-backup password</label>
+                <input id="recoveryPasswordConfirm" type="password" autocomplete="new-password" maxlength="1024" spellcheck="false">
+            </div>
+            <p id="recoveryPlaintextWarning" class="backup-warning" hidden>Plaintext recovery ZIP selected. Anyone with that recovery file can read the data being replaced.</p>
+        </div>
+        <label class="backup-check" id="restoreAckLabel" hidden><input id="restoreAck" type="checkbox"><span id="restoreAckText">I understand that existing conversations, memories, pictures and notes will be replaced. A recovery backup will be saved first.</span></label>
+        <button type="button" id="backupApply" hidden disabled>Restore this backup</button>
+    </section>
+</dialog>

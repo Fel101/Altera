@@ -1,0 +1,45 @@
+# Altera — runtime dependencies.
+#
+# Every package here is imported directly by the application (audited against the import graph, not guessed).
+# PyYAML, requests, urllib3 and werkzeug were missing. They install today anyway, as dependencies of chromadb,
+# huggingface_hub and flask -- which is the problem: config.yaml is read on nearly every code path, and whether Altera
+# starts at all is currently decided by what a vector database happens to depend on this month. Declared directly so
+# an upstream change cannot quietly take them away.
+#
+# Runtime compatibility ranges, with reviewed crypto/embedding interfaces pinned.
+# For the complete recorded environment, install requirements.lock.txt instead.
+
+# Web layer
+flask>=3.0
+waitress>=3.0,<4      # One-process, threaded WSGI server; also runs on Windows.
+werkzeug>=3.0          # HTTPException, used directly by the error handler in altera.py
+
+# Config and profile files
+PyYAML>=6.0
+
+# Authenticated encrypted backup envelopes (reviewed version-1 format).
+PyNaCl==1.6.2
+
+# LLM providers (OpenAI-compatible: LM Studio, Ollama, vLLM, OpenRouter)
+openai>=1.30
+httpx>=0.28,<1        # Bounded presence transport with redirects and retries disabled.
+
+# Environment
+python-dotenv>=1.0
+tzdata>=2026.5        # IANA quiet-hour/ritual zones, including on Windows.
+
+# Memory / vector store
+chromadb==1.5.9       # Reviewed collection configuration and MiniLM forward interfaces.
+tokenizers>=0.23.1,<0.24  # Direct local MiniLM tokenizer use; no implicit model acquisition.
+
+# Voice
+faster-whisper>=1.2.1,<2
+edge-tts>=6.1
+av>=17.1,<18          # Bounded voice-note container/codec validation, also used by faster-whisper.
+numpy>=2.4,<3         # Explicit PCM conversion for local speech activity.
+onnxruntime>=1.27,<2  # Installed CPU Silero inference; no runtime/model download by Altera.
+
+# Web search and HTTP helpers
+requests>=2.31
+urllib3>=2.0           # urllib3.util.retry.Retry, used directly by core/web_search.py
+beautifulsoup4>=4.12

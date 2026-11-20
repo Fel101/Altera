@@ -1,0 +1,42 @@
+.knowledge-page { height: auto; min-height: 100dvh; overflow: auto; display: block; padding: 28px 18px 56px; background: var(--bg-primary); color: var(--text-primary); font: 15px/1.6 system-ui, sans-serif; }
+.knowledge-shell { width: min(920px, 100%); margin: auto; }
+.knowledge-shell h1 { font-size: clamp(26px, 5vw, 36px); margin: 12px 0 4px; }
+.knowledge-shell h2 { font-size: 18px; margin-bottom: 10px; }
+.knowledge-shell a { color: var(--accent); }
+.knowledge-head p, .knowledge-muted { color: var(--text-secondary); }
+.knowledge-toolbar, #rememberForm { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; margin: 24px 0; }
+.knowledge-toolbar label, #rememberForm label { flex: 1; min-width: min(240px, 100%); }
+.knowledge-shell label { display: flex; flex-direction: column; gap: 7px; color: var(--text-secondary); }
+.knowledge-shell input, .knowledge-shell select, .knowledge-shell textarea { width: 100%; min-height: 44px; border: 1px solid var(--border); border-radius: 9px; padding: 10px; background: var(--bg-tertiary); color: var(--text-primary); font: inherit; box-sizing: border-box; }
+.knowledge-shell button { min-height: 44px; padding: 9px 16px; border: 1px solid var(--border); border-radius: 9px; color: var(--text-primary); background: var(--bg-hover); cursor: pointer; font: inherit; }
+.knowledge-shell button:disabled { opacity: .5; cursor: default; }
+.knowledge-shell :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.knowledge-new, .knowledge-banner, .knowledge-card, .knowledge-tools, .knowledge-report { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin: 22px 0; }
+.knowledge-banner { border-color: var(--warning); }
+.knowledge-banner button { margin-top: 12px; }
+.knowledge-section-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.knowledge-card { margin: 12px 0; }
+.knowledge-card header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; color: var(--text-secondary); font-size: 13px; }
+.knowledge-card .knowledge-fact { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px 0; }
+.knowledge-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.knowledge-card details { margin-top: 12px; color: var(--text-secondary); }
+.knowledge-shell summary { cursor: pointer; padding: 6px 0; }
+.knowledge-source { border-left: 2px solid var(--border); padding: 8px 12px; margin-top: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.knowledge-review { color: var(--warning); }
+#knowledgeStatus { min-height: 1.6em; }
+.knowledge-dialog label { display: block; margin: 14px 0 7px; }
+.knowledge-dialog textarea { min-height: 120px; width: 100%; box-sizing: border-box; padding: 12px; color: inherit; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+.knowledge-dialog p { margin: 12px 0; }
+.knowledge-dialog .knowledge-actions { justify-content: flex-end; }
+.knowledge-dialog select { display: block; width: 100%; box-sizing: border-box; min-height: 44px; padding: 10px; margin-top: 7px; border: 1px solid var(--border); border-radius: 8px; color: inherit; background: var(--bg-tertiary); font: inherit; }
+.knowledge-dialog .knowledge-check { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.knowledge-dialog .knowledge-check input { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); }
+.knowledge-dialog :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.knowledge-report h3 { font-size: 16px; margin: 18px 0 8px; }
+.knowledge-report h4 { font-size: 15px; margin: 14px 0 6px; }
+.knowledge-report-item { border-top: 1px solid var(--border); padding: 12px 0; }
+.knowledge-report-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.knowledge-report details { margin: 12px 0; }
+.knowledge-report-status { color: var(--text-secondary); font-size: 13px; }
+#knowledgeReportStatus { min-height: 1.6em; }
+@media (max-width: 480px) { .knowledge-page { padding: 20px 16px 40px; } .knowledge-new, .knowledge-card, .knowledge-tools, .knowledge-report { padding: 16px; } #rememberForm label { flex-basis: 100%; } }

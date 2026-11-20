@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script src="{{ url_for('static', filename='js/browser-state.js') }}"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0f0d15">
+    <title>Altera — Locked</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lock.css') }}">
+    <script nonce="{{ csp_nonce }}">window.__DATA_EPOCH__ = {{ dataset_epoch | tojson }}; try { AlteraPage.ready(() => { document.documentElement.dataset.theme = AlteraStorage.local.getItem('altera_theme') || 'dark'; }); } catch (_) {}</script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+</head>
+<body class="lock-page">
+    <main class="lock-shell" aria-labelledby="lockTitle">
+        <header class="lock-head">
+            <span class="lock-wordmark" aria-label="Altera">Altera</span>
+        </header>
+
+        <section class="lock-card">
+            <h1 id="lockTitle">This app is locked.</h1>
+            <p class="lock-lead">A grown-up set a PIN. Enter it to open the whole app, or choose Kids to stay with the pals made for a child.</p>
+
+            <form id="unlockForm" class="lock-form" autocomplete="off" novalidate>
+                <label class="lock-field" for="pinInput">Parent PIN</label>
+                <input id="pinInput" name="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8"
+                       autocomplete="off" autocapitalize="off" spellcheck="false"
+                       aria-describedby="pinHint lockStatus">
+                <p id="pinHint" class="lock-hint">4 to 8 digits.</p>
+                <button type="submit" id="unlockButton" class="lock-primary">Unlock Altera</button>
+            </form>
+
+            <div class="lock-divider" role="separator"></div>
+
+            <section class="lock-kids" aria-labelledby="kidsHeading">
+                <h2 id="kidsHeading">Kids</h2>
+                {% if kids_enabled and kids_pals %}
+                <p class="lock-hint">Only the pals in kids mode: {{ kids_pals | map(attribute='name') | join(', ') }}.</p>
+                <button type="button" id="kidsButton" class="lock-secondary">Open kids mode</button>
+                {% else %}
+                <p class="lock-hint">No pal is in kids mode yet. A grown-up can unlock the app and switch one on in its settings.</p>
+                {% endif %}
+            </section>
+
+            <p id="lockStatus" class="lock-status" role="status" aria-live="polite"></p>
+            <noscript><p class="lock-hint">Enable JavaScript to enter the PIN.</p></noscript>
+        </section>
+
+        <footer class="lock-foot">
+            <p>A PIN is a guardrail against a child clicking, not against someone who can edit the files on this PC.</p>
+        </footer>
+    </main>
+    <script src="{{ url_for('static', filename='js/lock.js') }}"></script>
+</body>
+</html>
